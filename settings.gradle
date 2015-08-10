@@ -1,0 +1,3 @@
+rootProject.name = 'android-git-sha'
+include 'android-git-sha-plugin'
+

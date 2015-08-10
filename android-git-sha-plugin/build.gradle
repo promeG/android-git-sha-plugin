@@ -1,0 +1,79 @@
+import java.text.SimpleDateFormat
+
+group = rootProject.ext.groupName
+version = rootProject.ext.releaseVersion
+
+apply plugin: 'groovy'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    compile 'com.android.tools.build:gradle:1.2.3'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+// custom tasks for creating source/javadoc jars
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+// add javadoc/source jar tasks as artifacts
+artifacts {
+    archives sourcesJar, javadocJar
+}
+
+// upload to local
+uploadArchives {
+    repositories { mavenLocal() }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            artifact sourcesJar
+            artifact javadocJar
+
+            artifactId 'android-git-sha-plugin'
+        }
+    }
+}
+
+bintray {
+    user = bintray_user //this usually comes from gradle.properties file in ~/.gradle
+    key = bintray_api_key //this usually comes from gradle.properties file in ~/.gradle
+    publications = ['mavenJava'] //When uploading Maven-based publication files
+    dryRun = false //Whether to run this as dry-run, without deploying
+    publish = true //If version should be auto published after an upload
+    pkg {
+        repo = 'maven'
+        name = 'android-git-sha-plugin'
+        desc = 'Add GIT SHA to apks for Android developers.'
+        websiteUrl = 'https://github.com/promeG/android-git-sha'
+        issueTrackerUrl = 'https://github.com/promeG/android-git-sha-plugin/issues'
+        vcsUrl = 'https://github.com/promeG/android-git-sha-plugin.git'
+        licenses = ['Apache-2.0']
+        labels = ['git sha', 'crash report', 'android']
+        publicDownloadNumbers = true
+        //Optional version descriptor
+        version {
+            name = rootProject.ext.releaseVersion //Bintray logical version name
+            released  = new SimpleDateFormat('yyyy-MM-dd\'T\'HH:mm:ss.SSSZZ').format(new Date()) //2 possible values: date in the format of 'yyyy-MM-dd'T'HH:mm:ss.SSSZZ' OR a java.util.Date instance
+            vcsTag = '1.0.0'
+        }
+    }
+}
