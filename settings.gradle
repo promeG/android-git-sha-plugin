@@ -1,3 +1,4 @@
 rootProject.name = 'android-git-sha'
 include 'android-git-sha-plugin'
+include 'android-git-sha-lib'
 

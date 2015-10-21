@@ -1,48 +1,63 @@
 package com.github.promeg.gitsha.plugin
+
 import com.android.build.gradle.AppPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
-import org.gradle.internal.reflect.Instantiator
+
 /**
- * Created by guyacong on 2015/3/24.
+ * Created by guyacong on 2015/8/11.
  */
 class GitShaPlugin implements Plugin<Project> {
     def CMD_GIT_SHA = 'git rev-parse --short HEAD'
+    GitShaPluginExtension gitShaExt;
 
     @Override
     void apply(Project project) {
 
+        gitShaExt = project.extensions.create("gitSha", GitShaPluginExtension)
+
         project.afterEvaluate {
+            def buildTypeMatcher = gitShaExt.buildTypeMatcher == null ? "release" : gitShaExt.buildTypeMatcher
+            def flavorMatcher = gitShaExt.flavorMatcher == null ? /.*/ : gitShaExt.flavorMatcher
+            def abortIfGitDirty = gitShaExt.abortIfGitDirty == null ? true : gitShaExt.abortIfGitDirty
+
             def hasApp = project.plugins.withType(AppPlugin)
             if (!hasApp) {
                 return
             }
 
-            final def log = project.logger
-            final def variants = project.android.applicationVariants
+            final def appVariants = project.android.applicationVariants
 
-            //log.debug("jarsignerExe: " + jarsignerExe)
-            //log.debug("zipalignExe: " + zipalignExe)
-
-            if( !isGitClean() ){
-                throw new IllegalStateException("There are uncommit changes or untracked files.")
-            }
-            project.task('gitsha') << {
-                println "\t\\-----hello: " + execCmdAndGetResult(CMD_GIT_SHA)
-                println "git check: " + isGitClean()
+            appVariants.matching({ it.buildType.name.matches(buildTypeMatcher) }).all {
+                def flavorName = it.properties.get('flavorName')
+                if (flavorName.matches(flavorMatcher)) {
+                    it.getAssemble().doFirst { task ->
+                        if (abortIfGitDirty && !isGitClean()) {
+                            throw new IllegalStateException("GitShaPlugin:  There are uncommit changes or untracked files in current git branch. Abort!")
+                        }
+                    }
+                    def gitSha = execCmdAndGetResult(CMD_GIT_SHA)
+                    def dirName = it.dirName
+                    it.outputs.each { output ->
+                        output.processManifest.doLast {
+                            def manifestFile = "${project.buildDir}/intermediates/manifests/full/${dirName}/AndroidManifest.xml"
+                            def updatedContent = new File(manifestFile).getText('UTF-8').replaceAll("\"ANDROID_GIT_SHA_PLUGIN_GIT_SHA1_VALUE\"", "\"" + gitSha + "\"")
+                            new File(manifestFile).write(updatedContent, 'UTF-8')
+                        }
+                    }
+                }
             }
         }
     }
 
-    boolean isGitClean(){
+    boolean isGitClean() {
         // check if the current git branch is dirty
-        if(execCmdAndGetResult("git diff --shortstat") != ''){
+        if (execCmdAndGetResult("git diff --shortstat") != '') {
             println("branch is dirty!")
             return false
         }
         // check if there is any untracked file
-        if(execCmdAndGetResult("git status --porcelain") != ''){
+        if (execCmdAndGetResult("git status --porcelain") != '') {
             println("there are untracked files!")
             return false
         }
@@ -58,8 +73,7 @@ class GitShaPlugin implements Plugin<Project> {
         String result = ''
         String line
         while ((line = reader.readLine()) != null) {
-            println("jarsigner output: " + line)
-                result += line
+            result += line
         }
         process.waitFor()
         return result

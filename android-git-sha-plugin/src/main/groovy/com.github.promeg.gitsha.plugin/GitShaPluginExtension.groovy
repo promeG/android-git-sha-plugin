@@ -1,19 +1,26 @@
 package com.github.promeg.gitsha.plugin
 
-import com.android.builder.model.SigningConfig
 
 /**
- * Created by guyacong on 2015/3/24.
+ * Created by guyacong on 2015/8/11.
  */
 class GitShaPluginExtension {
-    String prefix;
-    String subfix;
+    /**
+     * RegExp to match build types
+     *
+     * Default value: 'release'
+     */
+    String buildTypeMatcher;
 
-    String jarsignerPath;
-    String zipalignPath;
+    /**
+     * RegExp to match flavors
+     *
+     * Default value: '.*'
+     */
+    String flavorMatcher;
 
-    SigningConfig defaultSigningConfig;
-
-    GitShaPluginExtension() {
-    }
+    /**
+     * Default true: abort build if the current git branch is dirty
+     */
+    Boolean abortIfGitDirty;
 }

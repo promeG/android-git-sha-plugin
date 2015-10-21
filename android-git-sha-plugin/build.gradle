@@ -63,7 +63,7 @@ bintray {
         repo = 'maven'
         name = 'android-git-sha-plugin'
         desc = 'Add GIT SHA to apks for Android developers.'
-        websiteUrl = 'https://github.com/promeG/android-git-sha'
+        websiteUrl = 'https://github.com/promeG/android-git-sha-plugin'
         issueTrackerUrl = 'https://github.com/promeG/android-git-sha-plugin/issues'
         vcsUrl = 'https://github.com/promeG/android-git-sha-plugin.git'
         licenses = ['Apache-2.0']
