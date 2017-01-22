@@ -37,12 +37,11 @@ class GitShaPlugin implements Plugin<Project> {
                         }
                     }
                     def gitSha = execCmdAndGetResult(CMD_GIT_SHA)
-                    def dirName = it.dirName
                     it.outputs.each { output ->
                         output.processManifest.doLast {
-                            def manifestFile = "${project.buildDir}/intermediates/manifests/full/${dirName}/AndroidManifest.xml"
-                            def updatedContent = new File(manifestFile).getText('UTF-8').replaceAll("\"ANDROID_GIT_SHA_PLUGIN_GIT_SHA1_VALUE\"", "\"" + gitSha + "\"")
-                            new File(manifestFile).write(updatedContent, 'UTF-8')
+                            def manifestFile = output.processManifest.manifestOutputFile
+                            def updatedContent = manifestFile.getText('UTF-8').replaceAll("\"ANDROID_GIT_SHA_PLUGIN_GIT_SHA1_VALUE\"", "\"" + gitSha + "\"")
+                            manifestFile.write(updatedContent, 'UTF-8')
                         }
                     }
                 }
