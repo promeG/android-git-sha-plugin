@@ -1,5 +1,8 @@
 # android-git-sha-plugin
 
+[ ![Download](https://api.bintray.com/packages/promeg/maven/android-git-sha-plugin/images/download.svg) ](https://bintray.com/promeg/maven/android-git-sha-plugin/_latestVersion)
+
+
 Automaticlly add current GIT SHA value to your apk. It can rise an error if the current git branch is dirty.
 
 ## Why you should use a GIT SHA in your crash reporting.
