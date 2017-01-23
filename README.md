@@ -20,7 +20,7 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.github.promeg:android-git-sha-plugin:1.0.0'
+    classpath 'com.github.promeg:android-git-sha-plugin:1.0.1'
   }
 }
 ```
@@ -31,7 +31,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'android-git-sha'
 
 dependencies {
-  compile 'com.github.promeg:android-git-sha-lib:1.0.0'
+  compile 'com.github.promeg:android-git-sha-lib:1.0.1'
 }
 ```
 
